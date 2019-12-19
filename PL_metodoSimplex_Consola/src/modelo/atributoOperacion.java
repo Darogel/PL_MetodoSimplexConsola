@@ -12,8 +12,9 @@ import java.util.ArrayList;
  * @author Darwin
  */
 public class atributoOperacion {
-    public ArrayList<Double> variables = new ArrayList(); // numero de incognitas de la ecuacion
-    public int condicion = 0; // [-1 = menor_igual, 0 = igual, 1 = mayor_igual]
-    public Double valorIndependiente = 0d; // parte derecha de la ecuacion (despues del igual)
-    public int pivote = 0; // almacena el indice del pivote actual
+
+    public ArrayList<Double> variables = new ArrayList();
+    public int condicion = 0; // [0 = menor_igual, 1 = igual, 2 = mayor_igual]
+    public Double valorIndependiente = 0d;
+    public Double pivote = 0.0;
 }
