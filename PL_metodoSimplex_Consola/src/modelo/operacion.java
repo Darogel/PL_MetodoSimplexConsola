@@ -6,6 +6,7 @@
 package modelo;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Objects;
 import static pl_metodosimplex_consola.PL_metodoSimplex_Consola.funcion;
 import static pl_metodosimplex_consola.PL_metodoSimplex_Consola.opcionFuncion;
@@ -21,6 +22,7 @@ public class operacion {
     Double aux = 0.0;
     int intIndice = 0;
     boolean restriccion = false;
+    Double valorP = 0.0;
 
     /*
     Metodo para presentar las ecuaciones en forma de ecuación
@@ -183,41 +185,10 @@ public class operacion {
     Metodo implementado para resolver el problema
      */
     public void pivoteo() {
-        Double doPivoteo = 0.0;
         //While para resolver el problema mientras metodo comprobar sea true
         while (comprobar()) {
             operacionPivoteo();
             if (restriccion) {
-                if (funcion.get(intIndice).variables.get(pivoteAux) != 1) {
-                    doPivoteo = funcion.get(intIndice).variables.get(pivoteAux);
-                    //for donde se recorre restricción de pivote y se divide para
-                    //indice del valor la razón
-                    for (int i = 0; i < funcion.get(intIndice).variables.size(); i++) {
-                        funcion.get(intIndice).variables.set(i,
-                                funcion.get(intIndice).variables.get(i) / doPivoteo);
-                    }
-                    funcion.get(intIndice).valorIndependiente = funcion.get(intIndice).valorIndependiente
-                            / doPivoteo;
-                }
-                //For que recorre las restricciones
-                for (int i = 0; i < funcion.size(); i++) {
-                    Double doPivot = funcion.get(i).variables.get(pivoteAux);
-                    if (i != intIndice && doPivot != 0) {
-                        //For utilizado para recorrer demas ecuaciones y dejarlas en 1
-                        for (int j = 0; j < funcion.get(i).variables.size(); j++) {
-                            funcion.get(i).variables.set(j, funcion.get(i).variables.get(j)
-                                    / Math.abs(doPivot));
-//                        System.out.println("Funcion Dividida" + funcion.get(i).variables.get(j)
-//                                + "Divisor" + doPivot);
-                        }
-                        funcion.get(i).pivote = Math.abs(doPivot);
-//                    System.out.println("Valor Indi" + funcion.get(i).valorIndependiente
-//                            + ":" + Math.abs(doPivot));
-                        funcion.get(i).valorIndependiente = funcion.get(i).valorIndependiente
-                                / Math.abs(doPivot);
-                    }
-
-                }
                 operacionMultiplicar();
                 presentarFuncionTableu();
             }
@@ -231,45 +202,46 @@ public class operacion {
      */
     public void operacionMultiplicar() {
         //for que recorre todas las restricciones y F.o
+        Double doPivoteo = 0.0;
+        Double valorDiv = 0.0;
+        ArrayList<Double> funcionPivote = new ArrayList();
+        Double indipendiente = 0.0;
+        for (int i = 0; i < funcion.get(intIndice).variables.size(); i++) {
+            funcionPivote.add(funcion.get(intIndice).variables.get(i));
+        }
+        indipendiente = funcion.get(intIndice).valorIndependiente;
         for (int i = 0; i < funcion.size(); i++) {
             if (funcion.get(i).variables.get(pivoteAux) != 0) {
-                if (funcion.get(i).variables.get(pivoteAux) > 0) {
-                    if (i != intIndice) {
-                        //For para recorrer las variables de cada restriccion
-                        //Se multiplica por -1 la variable que contiene columna pivote
-                        //Se suma con la variable que se desea eliminar
-                        //Se multiplica por el numero que se dividio para no alterar
-                        for (int j = 0; j < funcion.get(i).variables.size(); j++) {
-                            funcion.get(i).variables.set(j, funcion.get(i).variables.get(j)
-                                    + (funcion.get(intIndice).variables.get(j) * -1));
-
-                            funcion.get(i).variables.set(j, funcion.get(i).variables.get(j)
-                                    * Math.abs(funcion.get(i).pivote));
+                if (i != intIndice) {
+                    for (int j = 0; j < funcion.get(i).variables.size(); j++) {
+                        if (j == 0) {
+                            valorDiv = (funcion.get(i).variables.get(pivoteAux)
+                                    / funcionPivote.get(pivoteAux)) * -1;
                         }
-                        funcion.get(i).valorIndependiente = funcion.get(i).valorIndependiente
-                                + (funcion.get(intIndice).valorIndependiente * -1);
-                        funcion.get(i).valorIndependiente = funcion.get(i).valorIndependiente
-                                * Math.abs(funcion.get(i).pivote);
+                        Double valorS = funcion.get(i).variables.get(j);
+                        funcion.get(i).variables.set(j, (funcionPivote.get(j)
+                                * valorDiv) + valorS);
                     }
+                    Double valorI = funcion.get(i).valorIndependiente;
+                    funcion.get(i).valorIndependiente = (indipendiente
+                            * valorDiv) + valorI;
                 } else {
-                    if (i != intIndice) {
-                        //For para recorrer las variables de cada restriccion
-                        //Se suma con la variable que se desea eliminar
-                        //Se multiplica por el numero que se dividio para no alterar
-                        for (int j = 0; j < funcion.get(i).variables.size(); j++) {
-                            funcion.get(i).variables.set(j, funcion.get(i).variables.get(j)
-                                    + funcion.get(intIndice).variables.get(j));
-                            funcion.get(i).variables.set(j, funcion.get(i).variables.get(j)
-                                    * Math.abs(funcion.get(i).pivote));
+                    if (funcion.get(intIndice).variables.get(pivoteAux) != 1) {
+                        doPivoteo = funcion.get(intIndice).variables.get(pivoteAux);
+                        //for donde se recorre restricción de pivote y se divide para
+                        //indice del valor la razón
+                        for (int k = 0; k < funcion.get(intIndice).variables.size(); k++) {
+                            funcion.get(intIndice).variables.set(k,
+                                    funcion.get(intIndice).variables.get(k) / doPivoteo);
                         }
-                        funcion.get(i).valorIndependiente = funcion.get(i).valorIndependiente
-                                + funcion.get(intIndice).valorIndependiente;
-                        funcion.get(i).valorIndependiente = funcion.get(i).valorIndependiente
-                                * Math.abs(funcion.get(i).pivote);
+                        funcion.get(intIndice).valorIndependiente = funcion.get(intIndice).valorIndependiente
+                                / doPivoteo;
                     }
                 }
             }
+
         }
+
     }
 
     public void operacionPivoteo() {
@@ -293,7 +265,7 @@ public class operacion {
         }
         System.out.println("El Pivote es en: " + valorMenor);
         //For para recorrer arreglo pivote 
-        for(int i = 0; i < pivote.length; i++) {
+        for (int i = 0; i < pivote.length; i++) {
             if (pivote[i] != 800) {
                 for (int k = 1; k < funcion.size(); k++) {
                     if (funcion.get(k).variables.get(pivote[i]) > 0) {
@@ -315,6 +287,7 @@ public class operacion {
                     if (razon < aux) {
                         aux = razon;
                         intIndice = i;
+                        valorP = funcion.get(i).variables.get(pivoteAux);
                         restriccion = true;
                     }
                 }
@@ -322,6 +295,7 @@ public class operacion {
             }
             System.out.println("La razón es: " + razon);
             System.out.println("El indice de la razón es: " + intIndice);
+            System.out.println("El valor del pivote es: " + valorP);
         }
     }
 }
