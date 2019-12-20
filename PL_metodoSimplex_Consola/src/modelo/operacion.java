@@ -5,9 +5,12 @@
  */
 package modelo;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Objects;
+import javax.swing.JOptionPane;
 import static pl_metodosimplex_consola.PL_metodoSimplex_Consola.funcion;
 import static pl_metodosimplex_consola.PL_metodoSimplex_Consola.opcionFuncion;
 
@@ -22,7 +25,10 @@ public class operacion {
     Double aux = 0.0;
     int intIndice = 0;
     boolean restriccion = false;
+
     Double valorP = 0.0;
+    Double compara = 0.0;
+    ArrayList<Integer> arPiv = new ArrayList();
 
     /*
     Metodo para presentar las ecuaciones en forma de ecuación
@@ -88,28 +94,75 @@ public class operacion {
     /*
     Método implementado para presentar función en tablas
      */
+    int con = 1;
+
     public void presentarFuncionTableu() {
         System.out.println("");
-        System.out.println("Tablas del método simplex ");
+        System.out.println("Iteración " + con);
         String cadena = "";
-        for (int i = 0; i < funcion.size(); i++) {
-            cadena = "";
-            //For que recorre el objeto de las ecuaciones y añade a variable cadena
-            for (int j = 0; j < funcion.get(i).variables.size(); j++) {
-                if (j == 0) {
-                    //cadena += df.format(funcion.get(i).variables.get(j));
-                    cadena += funcion.get(i).variables.get(j);
-                } else {
-                    //cadena += "|\t " + df.format(funcion.get(i).variables.get(j)) + " ";
-                    cadena += "|\t " + funcion.get(i).variables.get(j) + " ";
+        for (int i = 0; i < funcion.get(0).variables.size(); i++) {
+            cadena += "  \tX" + (i + 1);
+        }
+        cadena += "\t" + "V.Ind";
+        System.out.println(cadena);
+        for (int i = 1; i < funcion.size(); i++) {
+            for (int k = 0; k < funcion.get(i).variables.size(); k++) {
+                if (funcion.get(i).variables.get(k) == 1) {
+                    cadena = "X" + (k + 1);
+                    break;
                 }
             }
-            cadena += "|\t ";
-            //cadena += df.format(funcion.get(i).valorIndependiente);
-            cadena += funcion.get(i).valorIndependiente;
+            for (int j = 0; j < funcion.get(i).variables.size(); j++) {
+                if (j == 0) {
+                    if (funcion.get(i).variables.get(j) < 0) {
+                        BigDecimal bigDecimal = new BigDecimal(funcion.get(i).variables.get(j)).setScale(3, RoundingMode.UP);
+                        cadena += "\t" + bigDecimal.doubleValue();
+                    } else {
+                        BigDecimal bigDecimal = new BigDecimal(funcion.get(i).variables.get(j)).setScale(4, RoundingMode.UP);
+                        cadena += "\t" + bigDecimal.doubleValue();
+                    }
+                } else {
+                    if (funcion.get(i).variables.get(j) < 0) {
+                        BigDecimal bigDecimal = new BigDecimal(funcion.get(i).variables.get(j)).setScale(3, RoundingMode.UP);
+                        cadena += "\t" + bigDecimal.doubleValue();
+                    } else {
+                        BigDecimal bigDecimal = new BigDecimal(funcion.get(i).variables.get(j)).setScale(4, RoundingMode.UP);
+                        cadena += "\t" + bigDecimal.doubleValue();
+                    }
+                }
+            }
+            if (funcion.get(i).valorIndependiente < 0) {
+                BigDecimal bigDecimal = new BigDecimal(funcion.get(i).valorIndependiente).setScale(3, RoundingMode.UP);
+                cadena += "\t " + bigDecimal.doubleValue();
+            } else {
+                BigDecimal bigDecimal = new BigDecimal(funcion.get(i).valorIndependiente).setScale(4, RoundingMode.UP);
+                cadena += "\t " + bigDecimal.doubleValue();
+            }
             System.out.print(cadena);
             System.out.println("");
         }
+        cadena = " Z";
+        for (int i = 0; i < funcion.get(0).variables.size(); i++) {
+            if (funcion.get(0).variables.get(i) < 0) {
+                BigDecimal bigDecimal = new BigDecimal(funcion.get(0).variables.get(i)).setScale(3, RoundingMode.UP);
+                cadena += "\t" + bigDecimal.doubleValue();
+            } else {
+                BigDecimal bigDecimal = new BigDecimal(funcion.get(0).variables.get(i)).setScale(4, RoundingMode.UP);
+                cadena += "\t" + bigDecimal.doubleValue();
+            }
+        }
+        if (funcion.get(0).valorIndependiente < 0) {
+            BigDecimal bigDecimal = new BigDecimal(funcion.get(0).valorIndependiente).setScale(3, RoundingMode.UP);
+            cadena += "\t " + bigDecimal.doubleValue();
+        } else {
+            BigDecimal bigDecimal = new BigDecimal(funcion.get(0).valorIndependiente).setScale(4, RoundingMode.UP);
+            cadena += "\t " + bigDecimal.doubleValue();
+        }
+        System.out.println("");
+        cadena += "\t" + funcion.get(0).variables;
+        System.out.println(cadena);
+        System.out.println("");
+        con++;
     }
 
     /*
@@ -124,7 +177,7 @@ public class operacion {
                 funcion.get(0).variables.set(i, funcion.get(0).variables.get(i) * -1);
             }
             funcion.get(0).condicion = 1;
-            funcion.get(0).valorIndependiente = 0.0;
+            funcion.get(0).valorIndependiente = funcion.get(0).valorIndependiente * -1;
         }
         //For utilizado para recorrer restricciones
         for (int i = 1; i < funcion.size(); i++) {
@@ -168,6 +221,16 @@ public class operacion {
         presentarFuncionTableu();
     }
 
+    public boolean comprobarZ() {
+        for (int i = 0; i < funcion.get(0).variables.size(); i++) {
+            //si encuentra un valor negativo sigue resolviendo
+            if (funcion.get(0).valorIndependiente != compara) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /*
     Metodo implementado para comprobar si el ejercicio esta terminado
      */
@@ -191,10 +254,14 @@ public class operacion {
             if (restriccion) {
                 operacionMultiplicar();
                 presentarFuncionTableu();
+            } else {
+                System.out.println("No existe solución");
+                JOptionPane.showMessageDialog(null, "No existe solución");
+                break;
             }
 
         }
-        System.out.println("Ejercicio Terminado");
+        JOptionPane.showMessageDialog(null, "Ejercicio Terminado");
     }
 
     /*
@@ -211,8 +278,10 @@ public class operacion {
         }
         indipendiente = funcion.get(intIndice).valorIndependiente;
         for (int i = 0; i < funcion.size(); i++) {
+
             if (funcion.get(i).variables.get(pivoteAux) != 0) {
                 if (i != intIndice) {
+                    arPiv.add(i);
                     for (int j = 0; j < funcion.get(i).variables.size(); j++) {
                         if (j == 0) {
                             valorDiv = (funcion.get(i).variables.get(pivoteAux)
@@ -221,6 +290,9 @@ public class operacion {
                         Double valorS = funcion.get(i).variables.get(j);
                         funcion.get(i).variables.set(j, (funcionPivote.get(j)
                                 * valorDiv) + valorS);
+                    }
+                    if (i == 0) {
+                        compara = funcion.get(i).valorIndependiente;
                     }
                     Double valorI = funcion.get(i).valorIndependiente;
                     funcion.get(i).valorIndependiente = (indipendiente
@@ -247,8 +319,12 @@ public class operacion {
     public void operacionPivoteo() {
         Double valorMenor = 0.0;
         Double razon = 0d;
-        int[] pivote = new int[funcion.get(0).variables.size()];
+        restriccion = false;
+        intIndice = 0;
+        pivoteAux = 0;
+        valorP = 0.0;
         boolean terminarPivote = false;
+        int[] pivote = new int[funcion.get(0).variables.size()];
         //Se recorre F.O para encontrar valor mas negativo
         for (int i = 0; i < funcion.get(0).variables.size(); i++) {
             if (funcion.get(0).variables.get(i) < valorMenor) {
@@ -263,7 +339,7 @@ public class operacion {
                 }
             }
         }
-        System.out.println("El Pivote es en: " + valorMenor);
+
         //For para recorrer arreglo pivote 
         for (int i = 0; i < pivote.length; i++) {
             if (pivote[i] != 800) {
@@ -276,9 +352,9 @@ public class operacion {
             }
 
         }
-        System.out.println("El indice del Pivote: " + pivoteAux);
         aux = Double.MAX_VALUE;
         if (terminarPivote) {
+            System.out.println("El Pivote es en: " + valorMenor);
             //for para encontrar razón e indice de razón
             for (int i = 1; i < funcion.size(); i++) {
                 if (funcion.get(i).variables.get(pivoteAux) > 0) {
@@ -293,9 +369,7 @@ public class operacion {
                 }
 
             }
-            System.out.println("La razón es: " + razon);
-            System.out.println("El indice de la razón es: " + intIndice);
-            System.out.println("El valor del pivote es: " + valorP);
+            System.out.println("La razón se da en: " + valorP);
         }
     }
 }
