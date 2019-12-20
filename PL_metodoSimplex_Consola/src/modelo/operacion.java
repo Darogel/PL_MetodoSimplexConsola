@@ -27,8 +27,6 @@ public class operacion {
     boolean restriccion = false;
 
     Double valorP = 0.0;
-    Double compara = 0.0;
-    ArrayList<Integer> arPiv = new ArrayList();
 
     /*
     Metodo para presentar las ecuaciones en forma de ecuación
@@ -221,16 +219,6 @@ public class operacion {
         presentarFuncionTableu();
     }
 
-    public boolean comprobarZ() {
-        for (int i = 0; i < funcion.get(0).variables.size(); i++) {
-            //si encuentra un valor negativo sigue resolviendo
-            if (funcion.get(0).valorIndependiente != compara) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /*
     Metodo implementado para comprobar si el ejercicio esta terminado
      */
@@ -259,7 +247,6 @@ public class operacion {
                 JOptionPane.showMessageDialog(null, "No existe solución");
                 break;
             }
-
         }
         JOptionPane.showMessageDialog(null, "Ejercicio Terminado");
     }
@@ -278,10 +265,8 @@ public class operacion {
         }
         indipendiente = funcion.get(intIndice).valorIndependiente;
         for (int i = 0; i < funcion.size(); i++) {
-
             if (funcion.get(i).variables.get(pivoteAux) != 0) {
                 if (i != intIndice) {
-                    arPiv.add(i);
                     for (int j = 0; j < funcion.get(i).variables.size(); j++) {
                         if (j == 0) {
                             valorDiv = (funcion.get(i).variables.get(pivoteAux)
@@ -290,9 +275,6 @@ public class operacion {
                         Double valorS = funcion.get(i).variables.get(j);
                         funcion.get(i).variables.set(j, (funcionPivote.get(j)
                                 * valorDiv) + valorS);
-                    }
-                    if (i == 0) {
-                        compara = funcion.get(i).valorIndependiente;
                     }
                     Double valorI = funcion.get(i).valorIndependiente;
                     funcion.get(i).valorIndependiente = (indipendiente
@@ -311,9 +293,7 @@ public class operacion {
                     }
                 }
             }
-
         }
-
     }
 
     public void operacionPivoteo() {
@@ -339,7 +319,6 @@ public class operacion {
                 }
             }
         }
-
         //For para recorrer arreglo pivote 
         for (int i = 0; i < pivote.length; i++) {
             if (pivote[i] != 800) {
@@ -350,7 +329,6 @@ public class operacion {
                     }
                 }
             }
-
         }
         aux = Double.MAX_VALUE;
         if (terminarPivote) {
@@ -367,7 +345,6 @@ public class operacion {
                         restriccion = true;
                     }
                 }
-
             }
             System.out.println("La razón se da en: " + valorP);
         }
